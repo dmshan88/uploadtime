@@ -41,6 +41,7 @@ $container[Controller\UploadtimeController::class] = function ($c) {
 
 
 //errors
+
 $container['notFoundHandler'] = function ($c) {
     return function ($request, $response) use ($c) {
         return $c['response']
@@ -69,3 +70,4 @@ $container['errorHandler'] = function ($c) {
             ->withJson(['error'=>'soming error']);
     };
 };
+
