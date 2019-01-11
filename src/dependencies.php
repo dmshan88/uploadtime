@@ -1,5 +1,6 @@
 <?php
 // DIC configuration
+use Model\ReturnValue as ReturnValue; 
 
 $container = $app->getContainer();
 
@@ -32,13 +33,32 @@ $container['mongodb_p'] = function ($container) {
     return $capsule;
 };
 
+$container['mongodb_a'] = function ($container) {
+    $capsule = new \Illuminate\Database\Capsule\Manager;
+    $capsule->getDatabaseManager()->extend('mongodb', function($config)
+    {
+        return new Jenssegers\Mongodb\Connection($config);
+    });
+    $capsule->addConnection($container['settings']['mongodb_a']);
+
+    $capsule->setAsGlobal();
+    $capsule->bootEloquent();
+
+    return $capsule;
+};
 
 $container[Controller\UploadtimeController::class] = function ($c) {
     $celercare = $c->get('mongodb_c')->table('upload_time');
     $pointcare = $c->get('mongodb_p')->table('upload_time');
-    return new Controller\UploadtimeController($celercare,$pointcare);
+    $app_result = $c->get('mongodb_a')->table('panel_result');
+    return new Controller\UploadtimeController($celercare,$pointcare,$app_result);
 };
-
+$container[Controller\PanelresultController::class] = function ($c) {
+    $celercare_result = $c->get('mongodb_c')->table('panel_result');
+    $pointcare_result = $c->get('mongodb_p')->table('panel_result');
+    $app_result = $c->get('mongodb_a')->table('panel_result');
+    return new Controller\PanelresultController($celercare_result,$pointcare_result,$app_result);
+};
 
 //errors
 
